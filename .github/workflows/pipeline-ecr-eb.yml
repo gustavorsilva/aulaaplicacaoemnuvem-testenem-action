@@ -8,7 +8,7 @@ env:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ vars.AWS_REGION }}
       MODULE_NAME: ${{ vars.MODULE_NAME }}
-      TAG: ${{ vars.TAGS }}
+      TAG: ${{ vars.TAG }}
       STACK_NAME: ${{ vars.STACK_NAME }}
 jobs:
     build:
