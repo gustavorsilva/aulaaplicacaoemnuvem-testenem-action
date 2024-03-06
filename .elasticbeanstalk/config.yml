@@ -7,7 +7,7 @@ environment-defaults:
     repository: null
 global:
   application_name: aulaaplicacaoemnuvem
-  default_ec2_keyname: vockey
+  default_ec2_keyname: backend
   default_platform: Docker
   default_region: us-east-1
   include_git_submodules: true
