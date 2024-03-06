@@ -36,8 +36,8 @@ jobs:
       with:
         name: ebconfig
         path: |
-           backend/.elasticbeanstalk/config.yml
-           backend/Dockerrun.aws.json
+           .elasticbeanstalk/config.yml
+           Dockerrun.aws.json
     
   deploy:
     runs-on: ubuntu-latest
