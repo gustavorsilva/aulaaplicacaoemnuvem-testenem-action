@@ -1,6 +1,6 @@
 branch-defaults:
   default:
-    environment: aulaaplicacaoemnuvem
+    environment: backend
 environment-defaults:
   backend:
     branch: null
