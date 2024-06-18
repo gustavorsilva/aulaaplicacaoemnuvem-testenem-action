@@ -2,7 +2,9 @@ name: integracao-ecr-eb
 
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - main
+      - realse/*
 
 env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
