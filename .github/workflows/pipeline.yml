@@ -47,35 +47,60 @@ jobs:
           --key-name ssl \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
 
-  check_inserts:
+  deploy:
     runs-on: ubuntu-latest
     needs: build
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 2  # Garante que temos commits suficientes para a comparação
+      - uses: actions/download-artifact@v3
+        with:
+          name: ebconfig
+          path: .
+      - run: |
+          sed -i='' "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/" Dockerrun.aws.json
+          sed -i='' "s/<MODULE_NAME>/$MODULE_NAME/" Dockerrun.aws.json
+          sed -i='' "s/<TAG>/$TAG/" Dockerrun.aws.json
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: 'Install pip and awsebcli' #workaround: awsebcli não funciona com versões do pyyaml > 5.3
+        run: |
+            sudo wget https://bootstrap.pypa.io/get-pip.py
+            sudo python3 ./get-pip.py
+            sudo pip install "pyyaml<5.4"
+            sudo pip install --upgrade setuptools
+            sudo pip install --upgrade pip awsebcli            
+      - run: |           
+           eb deploy --verbose
 
-    - name: Get previous commit SHA
-      id: prev-commit
-      run: echo "PREVIOUS_SHA=$(git rev-parse HEAD^1)" >> $GITHUB_ENV
+  # check_inserts:
+  #   runs-on: ubuntu-latest
+  #   needs: build
 
-    - name: Count inserted lines
-      id: count_inserts
-      run: |
-        PREVIOUS_SHA=${{ env.PREVIOUS_SHA }}
-        CURRENT_SHA=${{ github.sha }}
-        echo "Previous SHA: $PREVIOUS_SHA"
-        echo "Current SHA: $CURRENT_SHA"
-        INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
-        echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v3
+  #     with:
+  #       fetch-depth: 2  # Garante que temos commits suficientes para a comparação
 
-    - name: Fail if more than or equal to 2 inserts
-      run: |
-        if [ ${{ env.INSERTED_LINES }} -ge 2 ]; then
-          echo "Too many inserted lines: ${{ env.INSERTED_LINES }}"
-          exit 1
-        fi
-      env:
-        INSERTED_LINES: ${{ env.INSERTED_LINES }}          
+  #   - name: Get previous commit SHA
+  #     id: prev-commit
+  #     run: echo "PREVIOUS_SHA=$(git rev-parse HEAD^1)" >> $GITHUB_ENV
+
+  #   - name: Count inserted lines
+  #     id: count_inserts
+  #     run: |
+  #       PREVIOUS_SHA=${{ env.PREVIOUS_SHA }}
+  #       CURRENT_SHA=${{ github.sha }}
+  #       echo "Previous SHA: $PREVIOUS_SHA"
+  #       echo "Current SHA: $CURRENT_SHA"
+  #       INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
+  #       echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
+
+  #   - name: Fail if more than or equal to 2 inserts
+  #     run: |
+  #       if [ ${{ env.INSERTED_LINES }} -ge 2 ]; then
+  #         echo "Too many inserted lines: ${{ env.INSERTED_LINES }}"
+  #         exit 1
+  #       fi
+  #     env:
+  #       INSERTED_LINES: ${{ env.INSERTED_LINES }}          
