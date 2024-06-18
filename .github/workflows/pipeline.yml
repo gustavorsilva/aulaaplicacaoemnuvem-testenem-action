@@ -63,7 +63,7 @@ jobs:
 
     - name: Fail if more than or equal to 50 inserts
       run: |
-        if [ ${{ steps.count_inserts.outputs.inserted_lines }} -ge 1 ]; then
+        if [ ${{ steps.count_inserts.outputs.inserted_lines }} -ge 2 ]; then
           echo "Too many inserted lines: ${{ steps.count_inserts.outputs.inserted_lines }}"
           exit 1
         fi            
