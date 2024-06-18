@@ -15,32 +15,34 @@ env:
       STACK_NAME: ${{ vars.STACK_NAME }}
   
 jobs:
-  start-runner:
-    name: Start self-hosted EC2 runner
+  create_ec2:
     runs-on: ubuntu-latest
-    outputs:
-      label: ${{ steps.start-ec2-runner.outputs.label }}
-      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
-      - name: Start EC2 runner
-        id: start-ec2-runner
-        uses: machulav/ec2-github-runner@v2
-        with:
-          mode: start
-          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-08a0d1e16fc3f61ea
-          ec2-instance-type: t3.nano
-          subnet-id: subnet-07183af139198b696
-          security-group-id: sg-06d38cdc9d4892ebe
-          iam-role-name: startandstop # optional, requires additional permissions
-          aws-resource-tags: > # optional, requires additional permissions
-            [
-              {"Key": "Name", "Value": "ec2-github-runner"},
-              {"Key": "GitHubRepository", "Value": "${{ github.repository }}"}
-            ]
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y awscli
+
+    - name: Configure AWS credentials
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set default.region ${{ vars.AWS_REGION }}
+
+    - name: Launch EC2 instance
+      run: |
+        aws ec2 run-instances \
+          --image-id ami-0c55b159cbfafe1f0 \  # Substitua pela ID da AMI desejada
+          --count 1 \
+          --instance-type t2.micro \  # Substitua pelo tipo de instância desejado
+          --key-name ssl \  # Substitua pelo nome do seu par de chaves
+          --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
