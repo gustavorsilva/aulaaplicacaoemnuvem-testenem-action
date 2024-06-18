@@ -44,5 +44,5 @@ jobs:
           --image-id ami-08a0d1e16fc3f61ea \
           --count 1 \
           --instance-type t2.micro \
-          --key-name MyKeyPair \
+          --key-name ssl \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
