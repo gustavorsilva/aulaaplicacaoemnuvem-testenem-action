@@ -11,15 +11,35 @@ env:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_REGION: ${{ vars.AWS_REGION }}
-      MODULE_NAME: ${{ vars.MODULE_NAME }}
       TAG: ${{ vars.TAG }}
       STACK_NAME: ${{ vars.STACK_NAME }}
   
 jobs:
-  deploy:
-    name: Deploy to EC2 on master branch push
+  start-runner:
+    name: Start self-hosted EC2 runner
     runs-on: ubuntu-latest
-
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
     steps:
-      - name: Checkout the files
-        uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          ec2-image-id: ami-08a0d1e16fc3f61ea
+          ec2-instance-type: t3.nano
+          subnet-id: subnet-07183af139198b696
+          security-group-id: sg-06d38cdc9d4892ebe
+          iam-role-name: startandstop # optional, requires additional permissions
+          aws-resource-tags: > # optional, requires additional permissions
+            [
+              {"Key": "Name", "Value": "ec2-github-runner"},
+              {"Key": "GitHubRepository", "Value": "${{ github.repository }}"}
+            ]
