@@ -40,9 +40,9 @@ jobs:
 
     - name: Launch EC2 instance
       run: |
-        aws ec2 run-instances \
-          --image-id ami-08a0d1e16fc3f61ea \  # Substitua pela ID da AMI desejada
-          --count 1 \
-          --instance-type t2.micro \  # Substitua pelo tipo de instância desejado
-          --key-name ssl \  # Substitua pelo nome do seu par de chaves
+        aws ec2 run-instances 
+          --image-id ami-08a0d1e16fc3f61ea   # Substitua pela ID da AMI desejada
+          --count 1 
+          --instance-type t2.micro  # Substitua pelo tipo de instância desejado
+          --key-name ssl   # Substitua pelo nome do seu par de chaves
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
