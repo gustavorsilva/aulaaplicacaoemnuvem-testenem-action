@@ -50,7 +50,7 @@ jobs:
  
   check_inserts:
     runs-on: ubuntu-latest
-    needs: reate_ec2
+    needs: create_ec2
 
     steps:
     - name: Checkout repository
