@@ -41,29 +41,29 @@ jobs:
     - name: Launch EC2 instance
       run: |
         aws ec2 run-instances \
-          --image-id ami-08a0d1e16fc3f61ea \
+          --image-id blablabla\
           --count 1 \
           --instance-type t2.micro \
           --key-name ssl \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
 
-  another_job:
+  check_modification:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Count commits in the branch
-      id: count_commits
+    - name: Count modified files
+      id: count_files
       run: |
-        commit_count=$(git rev-list --count HEAD)
-        echo "Number of commits: $commit_count"
-        echo "::set-output name=count::$commit_count"
-        
-    - name: Fail if more than 50 commits
+        MODIFIED_COUNT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | wc -l)
+        echo "Number of modified files: $MODIFIED_COUNT"
+        echo "::set-output name=modified_count::$MODIFIED_COUNT"
+
+    - name: Fail if more than or equal to 2 modifications
       run: |
-        if [ ${{ steps.count_commits.outputs.count }} -gt 2 ]; then
-          echo "Too many commits in the branch: ${{ steps.count_commits.outputs.count }}"
+        if [ ${{ steps.count_files.outputs.modified_count }} -ge 2 ]; then
+          echo "Too many modifications: ${{ steps.count_files.outputs.modified_count }}"
           exit 1
         fi              
