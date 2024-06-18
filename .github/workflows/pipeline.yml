@@ -58,7 +58,7 @@ jobs:
       id: count_inserts
       run: |
         INSERTED_LINES=$(git diff --numstat ${{ github.event.before }} ${{ github.sha }} | awk '{inserted+=$1} END {print inserted}')
-        echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
+        echo "inserted_lines=$INSERTED_LINES" >> $GITHUB_ENV
 
     - name: Fail if more than or equal to 50 inserts
       run: |
