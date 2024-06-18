@@ -70,9 +70,9 @@ jobs:
         INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
         echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
 
-    - name: Fail if more than or equal to 50 inserts
+    - name: Fail if more than or equal to 2 inserts
       run: |
-        if [ ${{ env.INSERTED_LINES }} -ge 50 ]; then
+        if [ ${{ env.INSERTED_LINES }} -ge 2 ]; then
           echo "Too many inserted lines: ${{ env.INSERTED_LINES }}"
           exit 1
         fi
