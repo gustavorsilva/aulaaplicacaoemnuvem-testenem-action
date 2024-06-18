@@ -46,3 +46,24 @@ jobs:
           --instance-type t2.micro \
           --key-name ssl \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
+
+  another_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Count commits in the branch
+      id: count_commits
+      run: |
+        commit_count=$(git rev-list --count HEAD)
+        echo "Number of commits: $commit_count"
+        echo "::set-output name=count::$commit_count"
+        
+    - name: Fail if more than 50 commits
+      run: |
+        if [ ${{ steps.count_commits.outputs.count }} -gt 50 ]; then
+          echo "Too many commits in the branch: ${{ steps.count_commits.outputs.count }}"
+          exit 1
+        fi              
