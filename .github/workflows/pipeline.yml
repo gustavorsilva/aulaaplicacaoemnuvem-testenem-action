@@ -47,23 +47,23 @@ jobs:
           --key-name ssl \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
 
-  check_modification:
+  check_inserts:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Count modified files
-      id: count_files
+    - name: Count inserted lines
+      id: count_inserts
       run: |
-        MODIFIED_COUNT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | wc -l)
-        echo "Number of modified files: $MODIFIED_COUNT"
-        echo "::set-output name=modified_count::$MODIFIED_COUNT"
+        INSERTED_LINES=$(git diff --numstat ${{ github.event.before }} ${{ github.sha }} | awk '{inserted+=$1} END {print inserted}')
+        echo "Number of inserted lines: $INSERTED_LINES"
+        echo "::set-output name=inserted_lines::$INSERTED_LINES"
 
-    - name: Fail if more than or equal to 2 modifications
+    - name: Fail if more than or equal to 50 inserts
       run: |
-        if [ ${{ steps.count_files.outputs.modified_count }} -ge 2 ]; then
-          echo "Too many modifications: ${{ steps.count_files.outputs.modified_count }}"
+        if [ ${{ steps.count_inserts.outputs.inserted_lines }} -ge 50 ]; then
+          echo "Too many inserted lines: ${{ steps.count_inserts.outputs.inserted_lines }}"
           exit 1
-        fi              
+        fi            
