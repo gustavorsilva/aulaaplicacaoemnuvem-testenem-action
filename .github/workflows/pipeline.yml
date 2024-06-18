@@ -80,8 +80,8 @@ jobs:
           --instance-type t2.micro \
           --key-name ssl \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
-                          --query 'Instances[0].InstanceId' \
-                          --output json)
+          --query 'Instances[0].InstanceId' \
+          --output json)
         INSTANCE_ID=$(echo $INSTANCE_INFO | jq -r '.')
     
   destroy_ec2:
