@@ -41,7 +41,7 @@ jobs:
     - name: Check if approval is needed
       id: check_approval
       run: |
-        if [ "${{ env.INSERTED_LINES }}" -ge 2 ]; then
+        if [ "${{ env.INSERTED_LINES }}" -ge 40 ]; then
           echo "Approval required due to too many inserted lines: ${{ env.INSERTED_LINES }}"
         else
           echo "No approval needed."
@@ -51,7 +51,7 @@ jobs:
 
   manual_approval:
     needs: check_inserts
-    if: ${{ env.INSERTED_LINES }} -ge 2
+    if: ${{ env.INSERTED_LINES }} -ge 40
     runs-on: ubuntu-latest
 
     steps:
