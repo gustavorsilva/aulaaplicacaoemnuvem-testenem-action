@@ -24,6 +24,8 @@ jobs:
     needs: request_approval
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3    
     - name: Wait for approval
       run: |
         echo "Waiting for approval..."
