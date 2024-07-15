@@ -31,34 +31,26 @@ jobs:
     - name: Count inserted lines
       id: count_inserts
       run: |
-        PREVIOUS_SHA=${{ env.PREVIOUS_SHA }}
-        CURRENT_SHA=${{ github.sha }}
+        PREVIOUS_SHA="${{ env.PREVIOUS_SHA }}"
+        CURRENT_SHA="${{ github.sha }}"
         echo "Previous SHA: $PREVIOUS_SHA"
         echo "Current SHA: $CURRENT_SHA"
-        INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
+        INSERTED_LINES=$(git diff --numstat "$PREVIOUS_SHA" "$CURRENT_SHA" -- my-folder | awk '{inserted+=$1} END {print inserted}')
         echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
-
-    - name: Check if approval is needed
-      id: check_approval
-      run: |
-        if [ "${{ env.INSERTED_LINES }}" -ge 40 ]; then
-          echo "Approval required due to too many inserted lines: ${{ env.INSERTED_LINES }}"
-        else
-          echo "No approval needed."
-        fi
+        echo "::set-output name=inserted_lines::$INSERTED_LINES"
       env:
-        INSERTED_LINES: ${{ env.INSERTED_LINES }}
+        PREVIOUS_SHA: ${{ env.PREVIOUS_SHA }}
 
   manual_approval:
     needs: check_inserts
-    if: ${{ env.INSERTED_LINES }} -ge 40
+    if: ${{ needs.check_inserts.outputs.inserted_lines }} -ge 2
     runs-on: ubuntu-latest
 
     steps:
     - name: Request manual approval
       uses: fjogeleit/manual-approval-action@v1
       with:
-        custom-message: "The number of inserted lines (${{ env.INSERTED_LINES }}) exceeds the limit. Please approve to continue."
+        custom-message: "The number of inserted lines ( ${{ needs.check_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue."
 
   deploy:
     needs: [check_inserts, manual_approval]
