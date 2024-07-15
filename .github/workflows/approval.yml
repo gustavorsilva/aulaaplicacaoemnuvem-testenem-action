@@ -1,0 +1,19 @@
+name: Approval Workflow
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  approve:
+    if: ${{ github.event.issue.labels.*.name }} contains 'approval-required'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check approval comment
+      if: ${{ github.event.comment.body == 'approved' }}
+      run: echo "Approval received"
+
+    - name: Deploy application
+      if: ${{ github.event.comment.body == 'approved' }}
+      run: echo "Deploying application..."

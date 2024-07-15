@@ -24,10 +24,6 @@ jobs:
       with:
         fetch-depth: 2  # Garante que temos commits suficientes para a comparação
 
-    - name: Get previous commit SHA
-      id: prev-commit
-      run: echo "PREVIOUS_SHA=$(git rev-parse HEAD^1)" >> $GITHUB_ENV
-
     - name: Count inserted lines
       id: count_inserts
       run: |
@@ -41,50 +37,20 @@ jobs:
       env:
         PREVIOUS_SHA: ${{ env.PREVIOUS_SHA }}
 
-  manual_approval:
-    needs: check_inserts
-    if: ${{ needs.check_inserts.outputs.inserted_lines }} -ge 40
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Create approval request
-      uses: peter-evans/repository-dispatch@v2
+    - name: Request manual approval
+      if: ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40
+      uses: actions/github-script@v6
       with:
-        event-type: manual-approval
-        client-payload: '{"message": "The number of inserted lines ( ${{ needs.check_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue."}'
-
-  wait_for_approval:
-    needs: manual_approval
-    runs-on: ubuntu-latest
-    if: ${{ needs.check_inserts.outputs.inserted_lines }} -ge 40
-    steps:
-    - name: Wait for approval
-      id: wait
-      run: |
-        echo "Waiting for approval..."
-        sleep 60
-        APPROVED=false
-        for i in {1..30}; do
-          COMMENTS=$(gh pr view ${{ github.event.pull_request.number }} --json comments -q '.comments[].body')
-          if echo "$COMMENTS" | grep -q "approved"; then
-            APPROVED=true
-            break
-          fi
-          sleep 60
-        done
-        if [ "$APPROVED" != "true" ]; then
-          echo "Approval not received."
-          exit 1
-        fi
-        echo "Approval received."
-
-  deploy:
-    needs: [check_inserts, wait_for_approval]
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Deploy application
-      run: echo "Deploying application..."
+        script: |
+          const { GITHUB_TOKEN } = process.env;
+          const octokit = require('@actions/github').getOctokit(GITHUB_TOKEN);
+          await octokit.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: "Approval Required",
+            body: `The number of inserted lines (${steps.count_inserts.outputs.inserted_lines}) exceeds the limit. Please approve to continue.`,
+            labels: ['approval-required']
+          });
 
 
   # create_ec2:
