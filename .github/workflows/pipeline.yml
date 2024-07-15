@@ -9,6 +9,7 @@ on:
 jobs:
   request_approval:
     runs-on: ubuntu-latest  
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3    
@@ -24,11 +25,13 @@ jobs:
     needs: request_approval
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3     
     - name: Wait for approval
-      uses: peter-evans/wait-for-approval@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        repository: ${{ github.repository }}
-        number: ${{ github.run_id }}
+      run: |
+        echo "Waiting for approval..."
+        while true; do
+          # Lógica para verificar se houve aprovação manual
+          # Exemplo: usar GitHub CLI para verificar comentários no PR
+          sleep 60  # Aguarda 1 minuto antes de verificar novamente
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
