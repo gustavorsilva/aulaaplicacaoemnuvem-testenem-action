@@ -45,61 +45,58 @@ jobs:
           exit 1
         fi
       env:
-        INSERTED_LINES: ${{ env.INSERTED_LINES }}  
-
-
-  create_ec2:
-    runs-on: ubuntu-latest
+        INSERTED_LINES: ${{ env.INSERTED_LINES }}
+  manual_approval:
     needs: check_inserts
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install AWS CLI
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y awscli
-
-    - name: Configure AWS credentials
-      run: |
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws configure set default.region ${{ vars.AWS_REGION }}
-
-    - name: Launch EC2 instance
-      run: |
-        aws ec2 run-instances \
-          --image-id ami-08a0d1e16fc3f61ea\
-          --count 1 \
-          --instance-type t2.micro \
-          --key-name ssl \
-          --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
-          --query 'Instances[0].InstanceId' \
-          --output json)
-        INSTANCE_ID=$(echo $INSTANCE_INFO | jq -r '.')
-    
-  destroy_ec2:
+    if: failure()
     runs-on: ubuntu-latest
-    needs: create_ec2
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v2
+    - name: Request manual approval
+      uses: fjogeleit/manual-approval-action@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1  # Substitua pela região AWS desejada
+        custom-message: "The number of inserted lines (${env.INSERTED_LINES}) exceeds the limit. Please approve to continue."
 
-    - name: Destroy EC2 Instance
-      run: |
-        aws ec2 terminate-instances --instance-ids $INSTANCE_ID
+  deploy:
+    needs: [check_inserts, manual_approval]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Deploy application
+      run: echo "Deploying application..."
+
+
+  # create_ec2:
+  #   runs-on: ubuntu-latest
+  #   needs: check_inserts
+
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
+
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v2
+  #     with:
+  #       node-version: '14'
+
+  #   - name: Install AWS CLI
+  #     run: |
+  #       sudo apt-get update
+  #       sudo apt-get install -y awscli
+
+  #   - name: Configure AWS credentials
+  #     run: |
+  #       aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       aws configure set default.region ${{ vars.AWS_REGION }}
+
+  #   - name: Launch EC2 instance
+  #     run: |
+  #       aws ec2 run-instances \
+  #         --image-id ami-08a0d1e16fc3f61ea\
+  #         --count 1 \
+  #         --instance-type t2.micro \
+  #         --key-name ssl \
+  #         --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
         
