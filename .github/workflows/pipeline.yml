@@ -25,21 +25,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3    
+      uses: actions/checkout@v3     
     - name: Wait for approval
-      run: |
-        echo "Waiting for approval..."
-        while true; do
-          APPROVED=$(gh issue view ${{ github.run_id }} --json comments --jq '.comments[].body' | grep -i "approved" || true)
-          if [ -n "$APPROVED" ]; then
-            echo "Approved!"
-            break
-          fi
-          echo "Waiting for approval..."
-          sleep 60
-        done
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Continue after approval
-      run: echo "Proceeding with the rest of the pipeline"
+      uses: peter-evans/wait-for-approval@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        number: ${{ github.run_id }}
