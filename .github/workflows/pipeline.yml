@@ -40,7 +40,7 @@ jobs:
 
     - name: Fail if more than or equal to 2 inserts
       run: |
-        if [ ${{ env.INSERTED_LINES }} -ge 40 ]; then
+        if [ ${{ env.INSERTED_LINES }} -ge 2 ]; then
           echo "Too many inserted lines: ${{ env.INSERTED_LINES }}"
           exit 1
         fi
