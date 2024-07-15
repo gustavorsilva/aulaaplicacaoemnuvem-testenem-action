@@ -44,25 +44,31 @@ jobs:
 
     - name: Request approval
       if: ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40
-      uses: peter-evans/wait-for-approval@v1
+      uses: peter-evans/repository-dispatch@v1
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        # Lista de usuários ou equipes que devem aprovar
-        approvers: |
-          user1
-          user2
-        # Mensagem para os aprovadores
-        message: 'The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue.'
-        # Tempo limite para aprovação em minutos (exemplo: 1 dia = 1440 minutos)
-        timeout-minutes: 1440
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: approval-required
+        client-payload: '{"inserted_lines": "${{ steps.count_inserts.outputs.inserted_lines }}"}'
+
+    - name: Wait for approval
+      if: ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40
+      run: |
+        echo "Waiting for approval..."
+        while [ "$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/approve | jq -r '.state')" != "approved" ]; do
+          echo "Waiting..."
+          sleep 60
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Continue after approval
-      if: ${{ steps.count_inserts.outputs.inserted_lines }} -lt 40 || always()
+      if: ${{ steps.count_inserts.outputs.inserted_lines }} -lt 40 || success()
       run: echo "Proceeding with the rest of the pipeline"
 
     - name: Deploy application
-      if: ${{ steps.count_inserts.outputs.inserted_lines }} -lt 40 || steps.wait-for-approval.outputs.approved == 'true'
-      run: echo "Deploying application...
+      if: ${{ steps.count_inserts.outputs.inserted_lines }} -lt 40 || success()
+      run: echo "Deploying application..."
 
   # create_ec2:
   #   runs-on: ubuntu-latest

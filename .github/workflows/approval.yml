@@ -1,0 +1,19 @@
+name: Approval Workflow
+
+on:
+  repository_dispatch:
+    types: [approval-required]
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check client payload
+      id: check_payload
+      run: echo "Inserted lines: ${{ github.event.client_payload.inserted_lines }}"
+
+    - name: Manual approval
+      run: |
+        echo "Please manually approve this workflow run."
+        exit 1
