@@ -23,19 +23,21 @@ jobs:
 
     - name: Check approval status
       run: |
-        PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-        OWNER=$(jq --raw-output .repository.owner.login "$GITHUB_EVENT_PATH")
-        REPO=$(jq --raw-output .repository.name "$GITHUB_EVENT_PATH")
-        
         API_RESPONSE=$(curl -X POST \
-          -H "Authorization: bearer ${{ secrets.S_GITHUB_TOKEN }}" \
+          -H "Authorization: bearer ${{ secrets.S_GITHUB_TOKEN  }}" \
           -H "Accept: application/vnd.github.groot-preview+json" \
           -d '{"query": "query { repository(owner:\"'$OWNER'\" name:\"'$REPO'\") { pullRequest(number:'$PR_NUMBER') { reviews(first: 10) { nodes { state author { login } } } } } }"}' \
           https://api.github.com/graphql)
-          
-        APPROVED=$(echo $API_RESPONSE | jq '.data.repository.pullRequest.reviews.nodes[] | select(.state=="APPROVED") | .author.login')
+
+        if [[ -z "$API_RESPONSE" ]]; then
+          echo "API response is empty or null."
+          exit 1
+        fi
+
+        # Use jq para verificar se há revisões e se alguma delas está aprovada
+        APPROVED=$(echo "$API_RESPONSE" | jq '.data.repository.pullRequest.reviews.nodes[] | select(.state=="APPROVED") | .author.login')
         
-        if [ -n "$APPROVED" ]; then
+        if [[ -n "$APPROVED" ]]; then
           echo "Approved by $APPROVED!"
         else
           echo "Not approved yet. Waiting for approval..."
