@@ -1,5 +1,3 @@
-#### Workflow de Aprovação (approval.yml)
-```yaml
 name: Approval Workflow
 
 on:
@@ -8,7 +6,7 @@ on:
 
 jobs:
   approve:
-    if: ${{ github.event.issue.labels.*.name }} contains 'approval-required'
+    if: contains(github.event.issue.labels.*.name, 'approval-required')
     runs-on: ubuntu-latest
 
     steps:

@@ -24,6 +24,10 @@ jobs:
       with:
         fetch-depth: 2  # Garante que temos commits suficientes para a comparação
 
+    - name: Get previous commit SHA
+      id: get_prev_commit
+      run: echo "PREVIOUS_SHA=$(git rev-parse HEAD^1)" >> $GITHUB_ENV
+
     - name: Count inserted lines
       id: count_inserts
       run: |
@@ -37,20 +41,14 @@ jobs:
       env:
         PREVIOUS_SHA: ${{ env.PREVIOUS_SHA }}
 
-    - name: Request manual approval
+    - name: Create approval request
       if: ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40
-      uses: actions/github-script@v6
+      uses: JasonEtco/create-an-issue@v2
       with:
-        script: |
-          const { GITHUB_TOKEN } = process.env;
-          const octokit = require('@actions/github').getOctokit(GITHUB_TOKEN);
-          await octokit.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: "Approval Required",
-            body: `The number of inserted lines (${steps.count_inserts.outputs.inserted_lines}) exceeds the limit. Please approve to continue.`,
-            labels: ['approval-required']
-          });
+        token: ${{ secrets.GITHUB_TOKEN }}
+        title: 'Approval Required'
+        body: 'The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue.'
+        labels: 'approval-required'
 
 
   # create_ec2:
