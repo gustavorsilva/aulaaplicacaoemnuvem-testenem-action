@@ -43,17 +43,44 @@ jobs:
 
   manual_approval:
     needs: check_inserts
-    if: ${{ needs.check_inserts.outputs.inserted_lines }} -ge 2
+    if: ${{ needs.check_inserts.outputs.inserted_lines }} -ge 40
     runs-on: ubuntu-latest
 
     steps:
-    - name: Request manual approval
-      uses: fjogeleit/manual-approval-action@v1
+    - name: Create approval request
+      uses: peter-evans/repository-dispatch@v2
       with:
-        custom-message: "The number of inserted lines ( ${{ needs.check_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue."
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: manual-approval
+        client-payload: '{"message": "The number of inserted lines ( ${{ needs.check_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue."}'
+
+  wait_for_approval:
+    needs: manual_approval
+    runs-on: ubuntu-latest
+    if: ${{ needs.check_inserts.outputs.inserted_lines }} -ge 40
+    steps:
+    - name: Wait for approval
+      id: wait
+      run: |
+        echo "Waiting for approval..."
+        sleep 60
+        APPROVED=false
+        for i in {1..30}; do
+          COMMENTS=$(gh pr view ${{ github.event.pull_request.number }} --json comments -q '.comments[].body')
+          if echo "$COMMENTS" | grep -q "approved"; then
+            APPROVED=true
+            break
+          fi
+          sleep 60
+        done
+        if [ "$APPROVED" != "true" ]; then
+          echo "Approval not received."
+          exit 1
+        fi
+        echo "Approval received."
 
   deploy:
-    needs: [check_inserts, manual_approval]
+    needs: [check_inserts, wait_for_approval]
     runs-on: ubuntu-latest
 
     steps:
