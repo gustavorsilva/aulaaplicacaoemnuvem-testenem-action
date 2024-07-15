@@ -13,7 +13,7 @@ env:
       AWS_REGION: ${{ vars.AWS_REGION }}
       TAG: ${{ vars.TAG }}
       STACK_NAME: ${{ vars.STACK_NAME }}
-      S_GITHUB_TOKEN: ${{vars.S_GITHUB_TOKEN}}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
 jobs:
   check_inserts:
@@ -46,7 +46,7 @@ jobs:
       if: ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40
       uses: JasonEtco/create-an-issue@v2
       with:
-        token: ${{ secrets.S_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         title: 'Approval Required'
         body: 'The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue.'
         labels: 'approval-required'
