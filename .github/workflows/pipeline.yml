@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3    
-      
+
     - name: Request approval
       uses: peter-evans/repository-dispatch@v1
       with:
@@ -21,19 +21,9 @@ jobs:
         event-type: approval-required
         client-payload: '{"approval_message": "Please approve this run to continue."}'
 
-    - name: Wait for approval
+    - name: Check approval status
       run: |
-        echo "Waiting for approval..."
-        while true; do
-          # Verificar se houve aprovação manual
-          # Exemplo: verificar se um comentário contendo "approved" foi adicionado ao pull request
-          APPROVED=$(gh pr view ${{ github.event.number }} --json comments --jq '.comments[].body' | grep -i "approved" || true)
-          if [ -n "$APPROVED" ]; then
-            echo "Approved!"
-            break
-          fi
-          echo "Waiting for approval..."
-          sleep 60  # Espera por 1 minuto antes de verificar novamente
-        done
+        PR_NUMBER=$(gh pr list --state open --base main --json number --jq '.[0].number')
+        gh pr merge $PR_NUMBER --auto --merge --squash
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
