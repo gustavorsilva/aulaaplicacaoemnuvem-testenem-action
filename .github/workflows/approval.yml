@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Check client payload
       id: check_payload
-      run: echo "Inserted lines: ${{ github.event.client_payload.inserted_lines }}"
+      run: echo "Approval message: ${{ github.event.client_payload.approval_message }}"
 
     - name: Manual approval
       run: |
