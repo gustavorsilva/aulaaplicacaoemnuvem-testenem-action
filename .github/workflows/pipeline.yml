@@ -5,7 +5,7 @@ on:
     branches: 
       - main
       - release/*
-      
+
 jobs:
   request_approval:
     runs-on: ubuntu-latest
@@ -14,7 +14,7 @@ jobs:
     - name: Request approval
       uses: peter-evans/repository-dispatch@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.S_GITHUB_TOKEN }}  # Substitua pelo seu token de acesso pessoal
         event-type: approval-required
         client-payload: '{"approval_message": "Please approve this run to continue."}'
 
