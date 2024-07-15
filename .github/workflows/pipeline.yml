@@ -42,16 +42,27 @@ jobs:
       env:
         PREVIOUS_SHA: ${{ env.PREVIOUS_SHA }}
 
-    - name: Create approval request
+    - name: Request approval
       if: ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40
-      uses: JasonEtco/create-an-issue@v2
+      uses: peter-evans/wait-for-approval@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        title: 'Approval Required'
-        body: |
-          The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. 
-          Please approve to continue by commenting 'approved' on this issue.
-        labels: 'approval-required'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        # Lista de usuários ou equipes que devem aprovar
+        approvers: |
+          user1
+          user2
+        # Mensagem para os aprovadores
+        message: 'The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue.'
+        # Tempo limite para aprovação em minutos (exemplo: 1 dia = 1440 minutos)
+        timeout-minutes: 1440
+
+    - name: Continue after approval
+      if: ${{ steps.count_inserts.outputs.inserted_lines }} -lt 40 || always()
+      run: echo "Proceeding with the rest of the pipeline"
+
+    - name: Deploy application
+      if: ${{ steps.count_inserts.outputs.inserted_lines }} -lt 40 || steps.wait-for-approval.outputs.approved == 'true'
+      run: echo "Deploying application...
 
   # create_ec2:
   #   runs-on: ubuntu-latest
