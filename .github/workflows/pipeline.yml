@@ -48,9 +48,10 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         title: 'Approval Required'
-        body: 'The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue.'
+        body: |
+          The number of inserted lines ( ${{ steps.count_inserts.outputs.inserted_lines }} ) exceeds the limit. 
+          Please approve to continue by commenting 'approved' on this issue.
         labels: 'approval-required'
-
 
   # create_ec2:
   #   runs-on: ubuntu-latest
