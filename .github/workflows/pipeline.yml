@@ -13,6 +13,7 @@ env:
       AWS_REGION: ${{ vars.AWS_REGION }}
       TAG: ${{ vars.TAG }}
       STACK_NAME: ${{ vars.STACK_NAME }}
+      S_GITHUB_TOKEN: ${{vars.S_GITHUB_TOKEN}}
   
 jobs:
   check_inserts:
