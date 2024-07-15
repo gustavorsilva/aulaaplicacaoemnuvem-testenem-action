@@ -50,7 +50,6 @@ jobs:
     - name: Create approval request
       uses: peter-evans/repository-dispatch@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         event-type: manual-approval
         client-payload: '{"message": "The number of inserted lines ( ${{ needs.check_inserts.outputs.inserted_lines }} ) exceeds the limit. Please approve to continue."}'
 
