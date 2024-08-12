@@ -31,7 +31,7 @@ jobs:
 
     - name: Set approval required
       id: approval
-      run: echo "approval_required=$(( INSERTED_LINES >= 40 ))" >> $GITHUB_ENV
+      run: echo "approval_required=$(( INSERTED_LINES >= 2 ))" >> $GITHUB_ENV
 
   wait_for_approval:
     runs-on: ubuntu-latest
