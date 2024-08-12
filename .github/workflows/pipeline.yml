@@ -29,7 +29,7 @@ jobs:
 
     - name: Set approval required
       id: set_approval
-      run: echo "approval_required=$(( INSERTED_LINES >= 50 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
+      run: echo "approval_required=$(( INSERTED_LINES >= 2 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
 
   wait_for_approval:
     runs-on: ubuntu-latest
