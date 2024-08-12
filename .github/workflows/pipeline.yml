@@ -34,7 +34,7 @@ jobs:
   wait_for_approval:
     runs-on: ubuntu-latest
     needs: check_inserts
-    if: needs.check_inserts.outputs.approval_required == 'false'
+    if: needs.check_inserts.outputs.approval_required == 'true'
 
     steps:
     - name: Wait for approval
@@ -45,7 +45,7 @@ jobs:
         # Atualize para o nome e versão correta de uma ação que solicita aprovação
         filters: |
           approval:
-            - '*.md'
+            - '*.json'
     - name: Approval received
       run: echo "Approval received. Continuing workflow..."
 
