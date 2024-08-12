@@ -29,22 +29,19 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set approval required
-      id: approval
+    - name: Determine if approval is required
+      id: approval_check
       run: |
-        if [ ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40 ]; then
-          echo "review=true"
-          echo "::set-output name=review::true"
+        if [ "${{ steps.count_inserts.outputs.inserted_lines }}" -ge 40 ]; then
+          echo "approval_required=true" >> $GITHUB_ENV
         else
-          echo "review=false"
-          echo "::set-output name=review::false"
-      env:
-        INSERTED_LINES: ${{ steps.count_inserts.outputs.inserted_lines }}
+          echo "approval_required=false" >> $GITHUB_ENV
+        fi
 
   wait_for_approval:
     runs-on: ubuntu-latest
     needs: check_inserts
-    if: ${{ needs.check_inserts.outputs.review == 'true' }}
+    if: ${{ needs.check_inserts.outputs.approval_required == 'true' }}
     environment:
       name: requires-approval
     steps:
