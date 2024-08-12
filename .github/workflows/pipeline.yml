@@ -45,7 +45,7 @@ jobs:
         # Atualize para o nome e versão correta de uma ação que solicita aprovação
         filters: |
           approval:
-            - '*.yaml'
+            - '*'
     - name: Approval received
       run: echo "Approval received. Continuing workflow..."
 
