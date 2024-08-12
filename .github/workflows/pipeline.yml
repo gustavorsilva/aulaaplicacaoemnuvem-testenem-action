@@ -7,38 +7,42 @@ on:
       - release/*
 
 jobs:
-  check_commits:
+  check_inserts:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Obtém todo o histórico de commits
+        fetch-depth: 2  # Garante que temos pelo menos dois commits para comparação
 
-    - name: Count commits
-      id: count_commits
+    - name: Count inserted lines
+      id: count_inserts
       run: |
-        COMMIT_COUNT=$(git rev-list --count HEAD)
-        echo "Commit count: $COMMIT_COUNT"
-        echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV
+        PREVIOUS_SHA=$(git rev-parse HEAD^1)
+        CURRENT_SHA=$(git rev-parse HEAD)
+        echo "Previous SHA: $PREVIOUS_SHA"
+        echo "Current SHA: $CURRENT_SHA"
+        INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
+        echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
+        echo "Inserted lines: $INSERTED_LINES"
 
-    - name: Request approval if commits exceed limit
-      if: ${{ env.COMMIT_COUNT }} >= 2  # Substitua '10' pelo limite desejado
-      run: echo "Commit count is ${{ env.COMMIT_COUNT }}. Requesting approval."
+    - name: Set approval required
+      id: set_approval
+      run: echo "approval_required=$(( INSERTED_LINES >= 2 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
 
   request_approval:
     runs-on: ubuntu-latest
-    needs: check_commits
-    if: needs.check_commits.outputs.COMMIT_COUNT && needs.check_commits.outputs.COMMIT_COUNT >= 2
+    needs: check_inserts
+    if: needs.check_inserts.outputs.approval_required == 'true'
 
     steps:
     - name: Request approval
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/create-or-update-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        event-type: approval-required
-        client-payload: '{"approval_message": "Approval required for commit count: ${{ needs.check_commits.outputs.COMMIT_COUNT }}"}'
+        issue-number: ${{ github.event.pull_request.number || github.event.number }}
+        body: "Approval required for insert count: ${{ env.INSERTED_LINES }}"
 
   wait_for_approval:
     runs-on: ubuntu-latest
@@ -47,11 +51,11 @@ jobs:
 
     steps:
     - name: Wait for approval
-      uses: actions/manual-approval@v1
+      uses: action/wait-for-approval@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        issue: ${{ github.event.issue.number }}
-        reactions: true
+        issue-number: ${{ github.event.pull_request.number || github.event.number }}
+        approval-message: "Please approve to continue."
 
     - name: Approved
       run: echo "Approval received. Continuing workflow..."
