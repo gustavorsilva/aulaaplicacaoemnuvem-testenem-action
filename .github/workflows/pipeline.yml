@@ -36,7 +36,7 @@ jobs:
   wait_for_approval:
     runs-on: ubuntu-latest
     needs: check_inserts
-    if: env.approvalrequired == '2'
+    if: env.approval_required == 'true'
     environment:
       name: requires-approval
     steps:
