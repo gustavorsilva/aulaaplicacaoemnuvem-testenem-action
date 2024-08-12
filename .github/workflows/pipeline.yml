@@ -33,11 +33,11 @@ jobs:
       id: approval
       run: |
         if [ ${{ steps.count_inserts.outputs.inserted_lines }} -ge 40 ]; then
-          echo "approval_required=true"
-          echo "::set-output name=approval_required::true"
+          echo "review=true"
+          echo "::set-output name=review::true"
         else
-          echo "approval_required=false"
-          echo "::set-output name=approval_required::false"
+          echo "review=false"
+          echo "::set-output name=review::false"
       env:
         INSERTED_LINES: ${{ steps.count_inserts.outputs.inserted_lines }}
 
@@ -46,7 +46,7 @@ jobs:
     needs: check_inserts
     environment:
       name: requires-approval
-    if: ${{ needs.check_inserts.outputs.approval_required == 'true' }}
+    if: ${{ needs.check_inserts.outputs.review == 'true' }}
     steps:
     - name: Approval received
       run: echo "Approval received. Continuing workflow..."
