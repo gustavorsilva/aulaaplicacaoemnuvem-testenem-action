@@ -29,33 +29,31 @@ jobs:
 
     - name: Set approval required
       id: set_approval
-      run: echo "approval_required=$(( INSERTED_LINES >= 4 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
+      run: echo "approval_required=$(( INSERTED_LINES >= 50 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
 
-  request_approval:
+  wait_for_approval:
     runs-on: ubuntu-latest
     needs: check_inserts
     if: needs.check_inserts.outputs.approval_required == 'true'
 
     steps:
-    - name: Request approval
-      uses: peter-evans/create-or-update-comment@v2
+    - name: Wait for approval
+      uses: dorny/paths-filter@v2
       with:
         token: ${{ secrets.S_GITHUB_TOKEN }}
-        issue-number: ${{ github.event.pull_request.number || github.event.number }}
-        body: "Approval required for insert count: ${{ env.INSERTED_LINES }}"
+        # Este é um placeholder, substituir por uma ação que solicite aprovação manual
+        # Atualize para o nome e versão correta de uma ação que solicita aprovação
+        filters: |
+          approval:
+            - '*.md'
+    - name: Approval received
+      run: echo "Approval received. Continuing workflow..."
 
-  wait_for_approval:
+  wait_for_approvall:
     runs-on: ubuntu-latest
-    needs: request_approval
-    if: needs.request_approval.result == 'success'
-
+    needs: check_inserts
+    environment:
+      name: approvalrequired
     steps:
     - name: Wait for approval
-      uses: action/wait-for-approval@v1
-      with:
-        token: ${{ secrets.S_GITHUB_TOKEN }}
-        issue-number: ${{ github.event.pull_request.number || github.event.number }}
-        approval-message: "Please approve to continue."
-
-    - name: Approved
-      run: echo "Approval received. Continuing workflow..."
+      run: echo "Waiting for manual approval..."
