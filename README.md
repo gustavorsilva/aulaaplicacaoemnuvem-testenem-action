@@ -5,10 +5,6 @@ To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
 To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
 To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
 
-v
-To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
-To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
-To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
-To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
+
 
 To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.To https://github.com/gustavorsilva/aulaaplicacaoemnuvem.
