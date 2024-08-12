@@ -7,41 +7,51 @@ on:
       - release/*
 
 jobs:
-  request_approval:
-    runs-on: ubuntu-latest  
+  check_commits:
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3    
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Obtém todo o histórico de commits
 
+    - name: Count commits
+      id: count_commits
+      run: |
+        COMMIT_COUNT=$(git rev-list --count HEAD)
+        echo "Commit count: $COMMIT_COUNT"
+        echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV
+
+    - name: Request approval if commits exceed limit
+      if: ${{ env.COMMIT_COUNT }} >= 10  # Substitua '10' pelo limite desejado
+      run: echo "Commit count is ${{ env.COMMIT_COUNT }}. Requesting approval."
+
+  request_approval:
+    runs-on: ubuntu-latest
+    needs: check_commits
+    if: needs.check_commits.outputs.COMMIT_COUNT && needs.check_commits.outputs.COMMIT_COUNT >= 10
+
+    steps:
     - name: Request approval
       uses: peter-evans/repository-dispatch@v1
       with:
-        token: ${{ secrets.S_GITHUB_TOKEN }}  # Substitua pelo seu token de acesso pessoal
+        token: ${{ secrets.GITHUB_TOKEN }}
         event-type: approval-required
-        client-payload: '{"approval_message": "Please approve this run to continue."}'
+        client-payload: '{"approval_message": "Approval required for commit count: ${{ needs.check_commits.outputs.COMMIT_COUNT }}"}'
 
-    - name: Check approval status
-      run: |
-        API_RESPONSE=$(curl -X POST \
-          -H "Authorization: bearer ${{ secrets.S_GITHUB_TOKEN  }}" \
-          -H "Accept: application/vnd.github.groot-preview+json" \
-          -d '{"query": "query { repository(owner:\"'$OWNER'\" name:\"'$REPO'\") { pullRequest(number:'$PR_NUMBER') { reviews(first: 10) { nodes { state author { login } } } } } }"}' \
-          https://api.github.com/graphql)
+  wait_for_approval:
+    runs-on: ubuntu-latest
+    needs: request_approval
+    if: needs.request_approval.result == 'success'
 
-        if [[ -z "$API_RESPONSE" ]]; then
-          echo "API response is empty or null."
-          exit 1
-        fi
+    steps:
+    - name: Wait for approval
+      uses: actions/manual-approval@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue: ${{ github.event.issue.number }}
+        reactions: true
 
-        # Use jq para verificar se há revisões e se alguma delas está aprovada
-        APPROVED=$(echo "$API_RESPONSE" | jq '.data.repository.pullRequest.reviews.nodes[] | select(.state=="APPROVED") | .author.login')
-        
-        if [[ -n "$APPROVED" ]]; then
-          echo "Approved by $APPROVED!"
-        else
-          echo "Not approved yet. Waiting for approval..."
-          exit 1
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Approved
+      run: echo "Approval received. Continuing workflow..."
