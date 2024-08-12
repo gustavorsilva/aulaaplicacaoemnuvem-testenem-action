@@ -29,13 +29,12 @@ jobs:
 
     - name: Set approval required
       id: set_approval
-      run: echo "approval_required=$(( INSERTED_LINES >= 2 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
+      run: echo "approvalrequired=$(( INSERTED_LINES >= 2 ))" >> $GITHUB_ENV  # Substitua '50' pelo limite desejado
 
   wait_for_approval:
     runs-on: ubuntu-latest
     needs: check_inserts
-    if: needs.check_inserts.outputs.approval_required == 'true'
-
+    if: needs.check_inserts.outputs.approvalrequired == 'true'
     steps:
     - name: Wait for approval
       uses: dorny/paths-filter@v2
@@ -45,15 +44,6 @@ jobs:
         # Atualize para o nome e versão correta de uma ação que solicita aprovação
         filters: |
           approval:
-            - '*'
+            - '*.json'
     - name: Approval received
       run: echo "Approval received. Continuing workflow..."
-
-  wait_for_approvall:
-    runs-on: ubuntu-latest
-    needs: check_inserts
-    environment:
-      name: approvalrequired
-    steps:
-    - name: Wait for approval
-      run: echo "Waiting for manual approval..."
