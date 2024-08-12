@@ -17,17 +17,17 @@ jobs:
         fetch-depth: 2  # Garante que temos commits suficientes para a comparação
 
     - name: Get previous commit SHA
-      id: get_prev_commit
+      id: prev-commit
       run: echo "PREVIOUS_SHA=$(git rev-parse HEAD^1)" >> $GITHUB_ENV
 
     - name: Count inserted lines
       id: count_inserts
       run: |
-        PREVIOUS_SHA="${{ env.PREVIOUS_SHA }}"
-        CURRENT_SHA="${{ github.sha }}"
+        PREVIOUS_SHA=${{ env.PREVIOUS_SHA }}
+        CURRENT_SHA=${{ github.sha }}
         echo "Previous SHA: $PREVIOUS_SHA"
         echo "Current SHA: $CURRENT_SHA"
-        INSERTED_LINES=$(git diff --numstat "$PREVIOUS_SHA" "$CURRENT_SHA" -- my-folder | awk '{inserted+=$1} END {print inserted}')
+        INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
         echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
 
     - name: Determine if approval is required
