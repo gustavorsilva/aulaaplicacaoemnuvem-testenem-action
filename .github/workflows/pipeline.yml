@@ -14,7 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 2  # Garante que temos pelo menos dois commits para comparação
+        fetch-depth: 1  # Garante que temos pelo menos dois commits para comparação
 
     - name: Count inserted lines
       id: count_inserts
