@@ -27,7 +27,7 @@ jobs:
         echo "INSERTED_LINES=$INSERTED_LINES"
         echo "::set-output name=inserted_lines::$INSERTED_LINES"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.S_GITHUB_TOKEN }}
 
     - name: Determine if approval is required
       id: approval_check
