@@ -40,7 +40,7 @@ jobs:
     - name: Wait for approval
       uses: dorny/paths-filter@v2
       with:
-        token: ${{ secrets.S_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         # Este é um placeholder, substituir por uma ação que solicite aprovação manual
         # Atualize para o nome e versão correta de uma ação que solicita aprovação
         filters: |
