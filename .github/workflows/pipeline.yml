@@ -33,7 +33,7 @@ jobs:
     - name: Determine if approval is required
       id: approval_check
       run: |
-        if [ "${{ steps.count_inserts.outputs.inserted_lines }}" -ge 3 ]; then
+        if [ "${{ env.INSERTED_LINES }}" -ge 3 ]; then
           echo "review=true" >> $GITHUB_ENV
         else
           echo "review=false" >> $GITHUB_ENV
