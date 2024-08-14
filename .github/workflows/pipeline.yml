@@ -57,7 +57,7 @@ jobs:
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ secrets.S_GITHUB_TOKEN }}
-        approvers: 'gudevops'
+        approvers: 'gustavorsilva'
         minimum-approvals: 1
         issue-title: "Deploying v1.3.5 to prod from staging"
         issue-body: "Please approve or deny the deployment of version v1.3.5."
