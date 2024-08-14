@@ -24,6 +24,7 @@ jobs:
         INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA | awk '{inserted+=$1} END {print inserted}')
         echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
         echo "::set-output name=inserted_lines::$INSERTED_LINES"
+        echo "INSERTED_LINES=$INSERTED_LINES" >> $GITHUB_ENV
 
     - name: Determine if approval is required
       id: approval_check
