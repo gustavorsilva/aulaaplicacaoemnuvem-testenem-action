@@ -52,12 +52,14 @@ jobs:
     if: ${{ needs.check_inserts.outputs.approval_required == 'true' }}
     steps:
     - name: Wait for approval
-      uses: peter-evans/wait-for-approval@v1
+      uses: trstringer/manual-approval@v1
       with:
-          repo-token: ${{ secrets.S_GITHUB_TOKEN }}
-          approvers: 'gustavorsilva'
-          timeout-minutes: 60
-          comment: "Please approve this step to proceed with the deployment."
+        secret: ${{ github.TOKEN }}
+        approvers: user1,user2,org-team1
+        minimum-approvals: 1
+        issue-title: "Deploying v1.3.5 to prod from staging"
+        issue-body: "Please approve or deny the deployment of version v1.3.5."
+        exclude-workflow-initiator-as-approver: false
 
     - name: Continue workflow after approval
       run: echo "Workflow approved. Continuing..."
