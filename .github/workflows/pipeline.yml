@@ -52,7 +52,7 @@ jobs:
     if: ${{ needs.check_inserts.outputs.approval_required == 'true' }}
     steps:
     - name: Wait for approval
-      uses: peter-evans/wait-for-approval@v2
+      uses: peter-evans/wait-for-approval@v1
       with:
           repo-token: ${{ secrets.S_GITHUB_TOKEN }}
           approvers: 'gustavorsilva'
