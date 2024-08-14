@@ -6,6 +6,8 @@ on:
       - main
       - release/*
       - feature/*
+env:
+      S_GITHUB_TOKEN: ${{ secrets.S_GITHUB_TOKEN }}
 
 jobs:
   check_inserts:
