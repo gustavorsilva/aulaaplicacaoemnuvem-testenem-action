@@ -7,35 +7,35 @@ on:
       - release/*
 
 jobs:
-  check_changes:
+  check_inserts:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Count changes
-      id: count_changes
+    - name: Count inserted lines
+      id: count_inserts
       run: |
-        CHANGED_FILES=$(git diff --name-only HEAD^1 HEAD | wc -l)
-        echo "CHANGED_FILES=$CHANGED_FILES"
-        echo "::set-output name=changed_files::$CHANGED_FILES"
+        INSERTED_LINES=$(git diff --numstat HEAD^1 HEAD | awk '{inserted+=$1} END {print inserted}')
+        echo "INSERTED_LINES=$INSERTED_LINES"
+        echo "::set-output name=inserted_lines::$INSERTED_LINES"
 
     - name: Determine if approval is required
       id: approval_check
       run: |
-        if [ "${{ steps.count_changes.outputs.changed_files }}" -gt 5 ]; then
-          echo "approval_required=true" >> $GITHUB_ENV
+        if [ "${{ steps.count_inserts.outputs.inserted_lines }}" -gt 5 ]; then
+          echo "approval_required=true"
         else
-          echo "approval_required=false" >> $GITHUB_ENV
+          echo "approval_required=false"
         fi
     outputs:
         approval_required: ${{ steps.approval_check.outputs.approval_required }}
 
   request_approval:
     runs-on: ubuntu-latest
-    needs: check_changes
-    if: ${{ needs.check_changes.outputs.approval_required == 'true' }}
+    needs: check_inserts
+    if: ${{ needs.check_inserts.outputs.approval_required == 'true' }}
     steps:
     - name: Wait for approval
       uses: hmarr/auto-approve-action@v2
