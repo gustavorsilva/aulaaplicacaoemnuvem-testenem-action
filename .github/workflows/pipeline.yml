@@ -40,7 +40,7 @@ jobs:
         else
           echo "approval_required=false"
         fi
-    env:
+      env:
         inserted_lines: ${{ steps.count_inserts.outputs.inserted_lines }}
     outputs:
         approval_required: ${{ env.approval_required }}
