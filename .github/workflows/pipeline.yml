@@ -17,7 +17,9 @@ jobs:
     - name: Count inserted lines
       id: count_inserts
       run: |
-        INSERTED_LINES=$(git diff --numstat HEAD^1 HEAD | awk '{inserted+=$1} END {print inserted}')
+        PREVIOUS_SHA=$(git rev-parse HEAD^1)
+        CURRENT_SHA=$(git rev-parse HEAD)
+        INSERTED_LINES=$(git diff --numstat $PREVIOUS_SHA $CURRENT_SHA -- my-folder | awk '{inserted+=$1} END {print inserted}')
         echo "INSERTED_LINES=$INSERTED_LINES"
         echo "::set-output name=inserted_lines::$INSERTED_LINES"
 
