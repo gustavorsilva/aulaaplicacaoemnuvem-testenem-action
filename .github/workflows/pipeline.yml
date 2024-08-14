@@ -54,7 +54,7 @@ jobs:
     if: ${{ needs.check_inserts.outputs.approval_required == 'true' }}
     steps:
     - name: Wait for approval
-      uses: trstringer/manual-approval@v1.6.0
+      uses: trstringer/manual-approval@v1
       with:
         secret: ${{ secrets.S_GITHUB_TOKEN }}
         approvers: 'gudevops'
