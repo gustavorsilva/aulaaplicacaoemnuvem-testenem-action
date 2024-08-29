@@ -38,7 +38,7 @@ jobs:
     - name: Determine if approval is required
       id: approval_check
       run: |
-        if [ "${{ steps.count_inserts.outputs.inserted_lines }}" -gt 20 ]; then
+        if [ "${{ steps.count_inserts.outputs.inserted_lines }}" -gt 5 ]; then
           echo "approval_required=true" >> $GITHUB_ENV
         else
           echo "approval_required=false" >> $GITHUB_ENV
