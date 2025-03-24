@@ -44,14 +44,3 @@
   "engines": {
     "node": ">=6.0.0"
   }
-  {
-    "AWSEBDockerrunVersion": "1",
-    "Image": {
-      "Name": "<AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/<MODULE_NAME>:<TAG>","Update": "true"
-    },
-    "Ports": [
-      {
-        "ContainerPort": "80"
-      }
-    ]
-  }
