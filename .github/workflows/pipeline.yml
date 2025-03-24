@@ -8,7 +8,7 @@ on:
 
 jobs:
   call-integracao:
-    uses: gustavorsilva/modulesproject/.github/workflows/integracao-ecr-eb.yml@v1
+    uses: gustavorsilva/modulesproject/.github/workflows/modules.yml@v1
     with:
       # Se você definiu inputs, passe os valores necessários
       branch: main
