@@ -36,7 +36,6 @@
     }
   ]
 }
-},
 "node_modules/@jridgewell/set-array": {
   "version": "1.1.2",
   "resolved": "https://registry.npmjs.org/@jridgewell/set-array/-/set-array-1.1.2.tgz",
@@ -45,3 +44,4 @@
   "engines": {
     "node": ">=6.0.0"
   }
+}
