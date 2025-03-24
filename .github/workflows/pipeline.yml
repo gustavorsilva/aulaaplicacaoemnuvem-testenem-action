@@ -11,6 +11,6 @@ jobs:
     uses: gustavorsilva/modulesproject/.github/workflows/modules.yml@v1
     with:
       # Se você definiu inputs, passe os valores necessários
-      branch: feature
+      branch: feature/*
     secrets:
       S_GITHUB_TOKEN: ${{ secrets.S_GITHUB_TOKEN }}
